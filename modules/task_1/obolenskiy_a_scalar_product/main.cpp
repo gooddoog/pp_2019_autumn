@@ -74,6 +74,20 @@ TEST(Scalar_Product_MPI, Check_Specified_Vector_Length) {
     ASSERT_ANY_THROW(getScalarProduct(v, u, vector_size - 1));
 }
 
+TEST(Scalar_Product_MPI, Check_Empty_Vector_Handling) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<int> v, u;
+    v = getRandomVector(0);
+    u = getRandomVector(0);
+
+    int answer = getScalarProduct(v, u, 0);
+
+    if (rank == 0) {
+        ASSERT_EQ(0, answer);
+    }
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     MPI_Init(&argc, &argv);
