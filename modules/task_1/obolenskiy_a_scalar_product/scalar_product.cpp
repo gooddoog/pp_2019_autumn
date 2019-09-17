@@ -3,6 +3,7 @@
 #include <random>
 #include <ctime>
 #include <vector>
+#include <stdexcept>
 #include "../../../modules/task_1/obolenskiy_a_scalar_product/scalar_product.h"
 
 static int offset = 0;
@@ -16,12 +17,40 @@ std::vector<int> getRandomVector(int sz) {
     return vec;
 }
 
-int getScalarProduct(std::vector <int> a, std::vector <int> b, int vector_size) {
+int getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, size_t vector_size) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     const int delta = vector_size / size;
     const int rem = vector_size % size;
+
+    int err_code;
+
+    if (rank == 0) {
+        if (a.size() != b.size()) {
+            err_code = 1;
+        } else if (a.size() != vector_size) {
+            err_code = 2;
+        } else {
+            err_code = 0;
+        }
+        for (int proc = 1; proc < size; ++proc)
+            MPI_Send(&err_code, 1, MPI_INT, proc, 9, MPI_COMM_WORLD);
+    } else {
+        MPI_Status status;
+        MPI_Recv(&err_code, 1, MPI_INT, 0, 9, MPI_COMM_WORLD, &status);
+    }
+    switch (err_code) {
+    case 0:
+        break;
+    case 1:
+        throw std::runtime_error("Vector sizes do not match");
+    case 2:
+        throw std::runtime_error("Specified vector size and real sizes do not match");
+    default:
+        throw std::runtime_error("Unknown error");
+        break;
+    }
 
     if (rank == 0) {
         for (int proc = 1; proc < size; ++proc) {
@@ -44,7 +73,7 @@ int getScalarProduct(std::vector <int> a, std::vector <int> b, int vector_size) 
     }
 
     int ans = 0;
-    for (unsigned i = 0; i < c.size(); ++i) {
+    for (size_t i = 0; i < c.size(); ++i) {
         ans += c[i] * d[i];
     }
 
