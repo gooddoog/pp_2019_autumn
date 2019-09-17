@@ -10,6 +10,7 @@ TEST(Scalar_Product_MPI, Test_On_Size_2) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     std::vector<int> v, u;
     const size_t vectorSize = 2;
+
     if (rank == 0) {
         v = getRandomVector(vectorSize);
         u = getRandomVector(vectorSize);
