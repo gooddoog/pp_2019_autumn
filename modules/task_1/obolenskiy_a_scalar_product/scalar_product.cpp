@@ -8,39 +8,39 @@
 
 static int offset = 0;
 
-std::vector<int> getRandomVector(int sz) {
+std::vector<int> getRandomVector(int vectorSize) {
     std::mt19937 gen;
     gen.seed(time(0) + ++offset);
-    std::vector<int> vec(sz);
-    for (int i = 0; i < sz; ++i)
+    std::vector<int> vec(vectorSize);
+    for (int i = 0; i < vectorSize; ++i)
         vec[i] = gen() % 100;
     return vec;
 }
 
-int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, size_t vector_size) {
+int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, size_t vectorSize) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    const int delta = vector_size / size;
-    const int rem = vector_size % size;
+    const int delta = vectorSize / size;
+    const int rem = vectorSize % size;
 
-    int err_code;
+    int errorCode;
 
     if (rank == 0) {
         if (a.size() != b.size()) {
-            err_code = 1;
-        } else if (a.size() != vector_size) {
-            err_code = 2;
+            errorCode = 1;
+        } else if (a.size() != vectorSize) {
+            errorCode = 2;
         } else {
-            err_code = 0;
+            errorCode = 0;
         }
         for (int proc = 1; proc < size; ++proc)
-            MPI_Send(&err_code, 1, MPI_INT, proc, 9, MPI_COMM_WORLD);
+            MPI_Send(&errorCode, 1, MPI_INT, proc, 9, MPI_COMM_WORLD);
     } else {
         MPI_Status status;
-        MPI_Recv(&err_code, 1, MPI_INT, 0, 9, MPI_COMM_WORLD, &status);
+        MPI_Recv(&errorCode, 1, MPI_INT, 0, 9, MPI_COMM_WORLD, &status);
     }
-    switch (err_code) {
+    switch (errorCode) {
     case 0:
         break;
     case 1:
