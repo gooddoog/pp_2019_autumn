@@ -19,7 +19,7 @@ TEST(Scalar_Product_MPI, Test_On_Size_2) {
     if (rank == 0) {
         int64_t seqAnswer = 0;
         for (size_t i = 0; i < vector_size; ++i) {
-            seqAnswer += v[i] * u[i];
+            seqAnswer += (int64_t)v[i] * u[i];
         }
         ASSERT_EQ(seqAnswer, answer);
     }
@@ -41,7 +41,7 @@ TEST(Scalar_Product_MPI, Test_On_Size_20) {
     if (rank == 0) {
         int64_t seqAnswer = 0;
         for (size_t i = 0; i < vector_size; ++i) {
-            seqAnswer += v[i] * u[i];
+            seqAnswer += (int64_t)v[i] * u[i];
         }
         ASSERT_EQ(seqAnswer, answer);
     }

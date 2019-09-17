@@ -47,9 +47,6 @@ int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b,
         throw std::runtime_error("Vector sizes do not match");
     case 2:
         throw std::runtime_error("Specified vector size and real sizes do not match");
-    default:
-        throw std::runtime_error("Unknown error");
-        break;
     }
 
     if (rank == 0) {
@@ -79,13 +76,13 @@ int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b,
 
     if (rank == 0) {
         for (int proc = 1; proc < size; ++proc) {
-            int temp;
+            int64_t temp;
             MPI_Status status;
-            MPI_Recv(&temp, 1, MPI_INT, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
+            MPI_Recv(&temp, 1, MPI_INT64_T, MPI_ANY_SOURCE, 3, MPI_COMM_WORLD, &status);
             ans += temp;
         }
     } else {
-        MPI_Send(&ans, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
+        MPI_Send(&ans, 1, MPI_INT64_T, 0, 3, MPI_COMM_WORLD);
     }
 
     return ans;
