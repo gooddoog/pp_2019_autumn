@@ -17,7 +17,7 @@ std::vector<int> getRandomVector(int sz) {
     return vec;
 }
 
-int getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, size_t vector_size) {
+int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, size_t vector_size) {
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -72,9 +72,9 @@ int getScalarProduct(const std::vector <int> &a, const std::vector <int> &b, siz
         MPI_Recv(&d[0], delta, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
     }
 
-    int ans = 0;
+    int64_t ans = 0;
     for (size_t i = 0; i < c.size(); ++i) {
-        ans += c[i] * d[i];
+        ans += (int64_t)c[i] * d[i];
     }
 
     if (rank == 0) {

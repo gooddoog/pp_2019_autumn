@@ -14,10 +14,10 @@ TEST(Scalar_Product_MPI, Test_On_Size_2) {
         u = getRandomVector(vector_size);
     }
 
-    int answer = getScalarProduct(v, u, vector_size);
+    int64_t answer = getScalarProduct(v, u, vector_size);
 
     if (rank == 0) {
-        int seqAnswer = 0;
+        int64_t seqAnswer = 0;
         for (size_t i = 0; i < vector_size; ++i) {
             seqAnswer += v[i] * u[i];
         }
@@ -36,10 +36,10 @@ TEST(Scalar_Product_MPI, Test_On_Size_20) {
         u = getRandomVector(vector_size);
     }
 
-    int answer = getScalarProduct(v, u, vector_size);
+    int64_t answer = getScalarProduct(v, u, vector_size);
 
     if (rank == 0) {
-        int seqAnswer = 0;
+        int64_t seqAnswer = 0;
         for (size_t i = 0; i < vector_size; ++i) {
             seqAnswer += v[i] * u[i];
         }
@@ -81,7 +81,7 @@ TEST(Scalar_Product_MPI, Check_Empty_Vector_Handling) {
     v = getRandomVector(0);
     u = getRandomVector(0);
 
-    int answer = getScalarProduct(v, u, 0);
+    int64_t answer = getScalarProduct(v, u, 0);
 
     if (rank == 0) {
         ASSERT_EQ(0, answer);
