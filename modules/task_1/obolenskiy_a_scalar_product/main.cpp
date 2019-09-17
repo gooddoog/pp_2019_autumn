@@ -1,6 +1,7 @@
 // Copyright 2019 Obolenskiy Arseniy
 #include <gtest-mpi-listener.hpp>
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <vector>
 #include "./scalar_product.h"
 
@@ -85,6 +86,30 @@ TEST(Scalar_Product_MPI, Check_Empty_Vector_Handling) {
 
     if (rank == 0) {
         ASSERT_EQ(0, answer);
+    }
+}
+
+TEST(Scalar_Product_MPI, Reversed_Vectors_Give_The_Same_Answer) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<int> v, u;
+    const size_t vector_size = 2;
+    if (rank == 0) {
+        v = getRandomVector(vector_size);
+        u = getRandomVector(vector_size);
+    }
+
+    int64_t answer = getScalarProduct(v, u, vector_size);
+
+    if (rank == 0) {
+        std::reverse(v.begin(), v.end());
+        std::reverse(u.begin(), u.end());
+    }
+
+    int64_t answerReversed = getScalarProduct(v, u, vector_size);
+
+    if (rank == 0) {
+        ASSERT_EQ(answer, answerReversed);
     }
 }
 
