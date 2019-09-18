@@ -20,8 +20,6 @@ endif( WIN32 )
 ################################ MPI ################################
 option(USE_MPI OFF)
 if( USE_MPI )
-    set (CMAKE_PREFIX_PATH "C:/Program\ Files\ (x86)/Microsoft\ SDKs/MPI")
-    message(STATUS " Prefix path: ${CMAKE_PREFIX_PATH}")
     find_package( MPI )
     if( MPI_FOUND )
         include_directories( ${MPI_INCLUDE_PATH} )
