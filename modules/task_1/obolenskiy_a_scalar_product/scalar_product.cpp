@@ -10,7 +10,7 @@ static int offset = 0;
 
 std::vector<int> getRandomVector(int vectorSize) {
     std::mt19937 gen;
-    gen.seed(time(0) + ++offset);
+    gen.seed((unsigned)time(0) + ++offset);
     std::vector<int> vec(vectorSize);
     for (int i = 0; i < vectorSize; ++i)
         vec[i] = gen() % 100;
