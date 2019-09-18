@@ -51,22 +51,24 @@ int64_t getScalarProduct(const std::vector <int> &a, const std::vector <int> &b,
 
     if (rank == 0) {
         for (int proc = 1; proc < size; ++proc) {
-            MPI_Send(&a[rem] + proc * delta, delta, MPI_INT, proc, 1, MPI_COMM_WORLD);
-            MPI_Send(&b[rem] + proc * delta, delta, MPI_INT, proc, 2, MPI_COMM_WORLD);
+            if (delta > 0) {
+                MPI_Send(&a[rem] + proc * delta, delta, MPI_INT, proc, 1, MPI_COMM_WORLD);
+                MPI_Send(&b[rem] + proc * delta, delta, MPI_INT, proc, 2, MPI_COMM_WORLD);
+            }
         }
     }
 
-    std::vector <int> c(delta), d(delta);
+    std::vector <int> c(delta, 0), d(delta, 0);
 
     if (rank == 0) {
-        c.resize(rem + delta);
-        d.resize(rem + delta);
         c = std::vector<int>(a.begin(), a.begin() + rem + delta);
         d = std::vector<int>(b.begin(), b.begin() + rem + delta);
     } else {
         MPI_Status status;
-        MPI_Recv(&c[0], delta, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-        MPI_Recv(&d[0], delta, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+        if (delta > 0) {
+            MPI_Recv(&c[0], delta, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+            MPI_Recv(&d[0], delta, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+        }
     }
 
     int64_t ans = 0;
