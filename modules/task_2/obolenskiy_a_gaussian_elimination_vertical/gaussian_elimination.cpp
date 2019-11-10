@@ -1,5 +1,6 @@
 // Copyright 2019 Obolenskiy Arseniy
 #include <mpi.h>
+#include <cassert>
 #include <iostream>
 #include <random>
 #include <ctime>
@@ -124,17 +125,19 @@ std::vector <double> solveParallel(const std::vector <double> &a, size_t rows, s
         std::cout << "recv " << v.size() << " of numbers 0->" << rank << std::endl;
     }
 
-    std::vector <double> pivotCol;
+    std::vector <double> pivotCol(rows);
     for (size_t row = 0; row < rows; ++row) {
         if (static_cast<int>(row) % size == rank) {
-            pivotCol = std::vector<double>(v.begin() + rows * (row / size), v.begin() + rows * (row / size + 1));
-        } else {
-            pivotCol.resize(rows);
+            int index = 0;
+            for (size_t i = rows * (row / size); i < rows * (row / size + 1); ++i) {
+                pivotCol[index++] = v[i];
+            }
+            assert(index == rows);
         }
-        MPI_Bcast(pivotCol.data(), pivotCol.size(), MPI_DOUBLE, row % size, MPI_COMM_WORLD);
+        MPI_Bcast(pivotCol.data(), rows, MPI_DOUBLE, row % size, MPI_COMM_WORLD);
         if (rank == 0) {
             std::cout << "pivotCol: ";
-            for (size_t i = 0; i < pivotCol.size(); ++i) {
+            for (size_t i = 0; i < rows; ++i) {
                 std::cout << pivotCol[i] << " ";
             }
             std::cout << std::endl;
