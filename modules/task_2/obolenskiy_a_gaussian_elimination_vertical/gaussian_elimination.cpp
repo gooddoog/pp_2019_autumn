@@ -24,6 +24,13 @@ std::vector <double> getRandomMatrix(int rows, int cols, double min_value, doubl
 }
 
 std::vector <double> solveSequential(const std::vector <double> &a, size_t rows, size_t cols) {
+    if (rows * cols != a.size()) {
+        throw std::runtime_error("Matrix sizes does not match");
+    }
+    if (rows + 1 != cols) {
+        throw std::runtime_error("Incorrect amount of rows and cols");
+    }
+
     std::vector <double> result(rows);
     std::vector <double> b(a);
     for (size_t k = 0; k < rows; ++k) {
@@ -66,6 +73,24 @@ std::vector <double> solveParallel(const std::vector <double> &a, size_t rows, s
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     const int delta = cols / size;
     const int rem = cols % size;
+
+    int code = 0;
+
+    if (rows * cols != a.size()) {
+        code = 1;
+    }
+    MPI_Bcast(&code, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (code != 0) {
+        throw std::runtime_error("Matrix sizes does not match");
+    }
+
+    if (rows + 1 != cols) {
+        code = 2;
+    }
+    MPI_Bcast(&code, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    if (code != 0) {
+        throw std::runtime_error("Incorrect amount of rows and cols");
+    }
 
     std::vector <double> v((delta + (rank < rem ? 1 : 0)) * rows);
 

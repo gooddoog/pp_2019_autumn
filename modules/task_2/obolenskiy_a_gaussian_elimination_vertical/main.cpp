@@ -104,6 +104,82 @@ TEST(Gaussian_Elimination_MPI, Test_3x4_1) {
     }
 }
 
+TEST(Gaussian_Elimination_MPI, Handling_Of_Incorrect_Matrix_Size_1) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<double> a;
+    const int rows = 3;
+    const int cols = 4;
+
+    if (rank == 0) {
+        a = {
+            2, 3, -1, 9,
+            1, -2, 1, 3,
+            1, 0, 2, 2
+        };
+    }
+
+    EXPECT_ANY_THROW(solveParallel(a, rows, cols + 1));
+}
+
+TEST(Gaussian_Elimination_MPI, Handling_Of_Incorrect_Matrix_Size_2) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<double> a;
+    const int rows = 3;
+    const int cols = 4;
+
+    if (rank == 0) {
+        a = {
+            2, 3, -1,
+            1, -2, 1,
+            1, 0, 2
+        };
+    }
+
+    EXPECT_ANY_THROW(solveParallel(a, rows, cols));
+}
+
+TEST(Gaussian_Elimination_MPI, Handling_Of_Incorrect_Matrix_Size_1_Seq) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<double> a;
+    const int rows = 3;
+    const int cols = 4;
+
+    if (rank == 0) {
+        a = {
+            2, 3, -1, 9,
+            1, -2, 1, 3,
+            1, 0, 2, 2
+        };
+    }
+
+    if (rank == 0) {
+        EXPECT_ANY_THROW(solveSequential(a, rows, cols + 1));
+    }
+}
+
+TEST(Gaussian_Elimination_MPI, Handling_Of_Incorrect_Matrix_Size_2_Seq) {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::vector<double> a;
+    const int rows = 3;
+    const int cols = 4;
+
+    if (rank == 0) {
+        a = {
+            2, 3, -1,
+            1, -2, 1,
+            1, 0, 2
+        };
+    }
+
+    if (rank == 0) {
+        EXPECT_ANY_THROW(solveSequential(a, rows, cols));
+    }
+}
+
 
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
