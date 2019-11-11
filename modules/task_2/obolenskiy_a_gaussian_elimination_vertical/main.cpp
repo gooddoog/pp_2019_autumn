@@ -19,6 +19,29 @@ static bool checkEqual(const std::vector <double> &a, const std::vector <double>
     return true;
 }
 
+static bool checkSolution(const std::vector <double> &a, size_t rows, size_t cols,
+                          const std::vector <double> &x) {
+    if (rows * cols != a.size()) {
+        throw std::runtime_error("Matrix sizes does not match");
+    }
+    if (rows + 1 != cols) {
+        throw std::runtime_error("Incorrect amount of rows and cols");
+    }
+
+    std::vector <double> result(rows, 0);
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < rows; ++j) {
+            result[i] += a[i * cols + j] * x[j];
+        }
+    }
+    for (size_t i = 0; i < rows; ++i) {
+        if (result[i] - a[i * cols + rows] > EPS) {
+            return false;
+        }
+    }
+    return true;
+}
+
 TEST(Gaussian_Elimination_MPI, Test_2x3_1) {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -37,6 +60,7 @@ TEST(Gaussian_Elimination_MPI, Test_2x3_1) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
@@ -58,6 +82,7 @@ TEST(Gaussian_Elimination_MPI, Test_2x3_2) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
@@ -79,6 +104,7 @@ TEST(Gaussian_Elimination_MPI, Test_2x3_3) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
@@ -101,6 +127,7 @@ TEST(Gaussian_Elimination_MPI, Test_3x4_1) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
@@ -198,6 +225,7 @@ TEST(Gaussian_Elimination_MPI, Test_2x3_Homogeneous_System) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
@@ -222,6 +250,7 @@ TEST(Gaussian_Elimination_MPI, Test_5x6_Homogeneous_System) {
     if (rank == 0) {
         std::vector <double> seqAnswer = solveSequential(a, rows, cols);
         ASSERT_TRUE(checkEqual(seqAnswer, answer));
+        ASSERT_TRUE(checkSolution(a, rows, cols, answer));
     }
 }
 
