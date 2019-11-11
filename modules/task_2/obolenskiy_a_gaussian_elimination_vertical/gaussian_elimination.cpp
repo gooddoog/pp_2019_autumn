@@ -50,21 +50,9 @@ std::vector <double> solveSequential(const std::vector <double> &a, size_t rows,
     for (int k = static_cast<int>(rows) - 1; k >= 0; --k) {
         result[k] = b[k * cols + cols - 1];
         for (int i = 0; i < k; i++) {
-            b[i * cols + cols - 1] = b[i * cols + cols - 1] - b[i * cols + k] * result[k];
+            b[i * cols + cols - 1] -= b[i * cols + k] * result[k];
         }
     }
-
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            std::cout << b[i * cols + j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "seq. result: ";
-    for (size_t i = 0; i < result.size(); ++i) {
-        std::cout << result[i] << " ";
-    }
-    std::cout << std::endl;
     return result;
 }
 
@@ -96,33 +84,20 @@ std::vector <double> solveParallel(const std::vector <double> &a, size_t rows, s
     std::vector <double> v((delta + (rank < rem ? 1 : 0)) * rows);
 
     if (rank == 0) {
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                std::cout << a[i * cols + j] << " ";
-            }
-            std::cout << std::endl;
-        }
         for (int proc = size - 1; proc >= 0; --proc) {
-            std::cout << "proc: " << proc << std::endl;
             int index = 0;
             for (size_t j = proc; j < cols; j += size) {
                 for (size_t i = 0; i < rows; ++i) {
                     v[index++] = a[i * cols + j];
                 }
             }
-            for (size_t i = 0; i < v.size(); ++i) {
-                std::cout << v[i] << " ";
-            }
-            std::cout << std::endl;
             if (proc > 0) {
                 MPI_Send(v.data(), index, MPI_DOUBLE, proc, 1, MPI_COMM_WORLD);
             }
-            std::cout << "sent " << index << " of numbers 0->" << proc << std::endl;
         }
     } else {
         MPI_Status stat;
         MPI_Recv(v.data(), v.size(), MPI_DOUBLE, 0, 1, MPI_COMM_WORLD, &stat);
-        std::cout << "recv " << v.size() << " of numbers 0->" << rank << std::endl;
     }
 
     std::vector <double> pivotCol(rows);
@@ -135,13 +110,6 @@ std::vector <double> solveParallel(const std::vector <double> &a, size_t rows, s
             assert(index == rows);
         }
         MPI_Bcast(pivotCol.data(), rows, MPI_DOUBLE, row % size, MPI_COMM_WORLD);
-        if (rank == 0) {
-            std::cout << "pivotCol: ";
-            for (size_t i = 0; i < rows; ++i) {
-                std::cout << pivotCol[i] << " ";
-            }
-            std::cout << std::endl;
-        }
         double pivotRow = pivotCol[row];
         for (int j = row / size; j < (delta + (rank < rem ? 1 : 0)); ++j) {
             double pivotC = v[j * rows + row];
@@ -155,30 +123,14 @@ std::vector <double> solveParallel(const std::vector <double> &a, size_t rows, s
         }
     }
 
-    std::cout << "rank " << rank << ": ";
-    for (size_t i = 0; i < v.size(); ++i) {
-        std::cout << v[i] << " ";
-    }
-    std::cout << std::endl;
-
     if ((cols - 1) % size == (size_t)rank) {
         MPI_Request rq;
         MPI_Isend(v.data() + ((cols - 1) / size) * rows, rows, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &rq);
-        std::cout << "sent answer: ";
-        for (size_t i = ((cols - 1) / size) * rows; i < ((cols - 1) / size) * rows + rows; ++i) {
-            std::cout << v[i] << " ";
-        }
-        std::cout << std::endl;
     }
     if (rank == 0) {
         v.resize(rows);
         MPI_Status stat;
         MPI_Recv(v.data(), rows, MPI_DOUBLE, (cols - 1) % size, 2, MPI_COMM_WORLD, &stat);
-        std::cout << "status: " << stat.MPI_ERROR << " got answer:";
-        for (size_t i = 0; i < v.size(); ++i) {
-            std::cout << v[i] << " ";
-        }
-        std::cout << std::endl;
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
